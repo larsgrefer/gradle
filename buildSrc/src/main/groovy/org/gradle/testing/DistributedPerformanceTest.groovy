@@ -18,7 +18,6 @@ package org.gradle.testing
 
 import com.google.common.base.Splitter
 import com.google.common.collect.Lists
-import groovy.transform.CompileStatic
 import groovy.transform.TypeChecked
 import groovy.transform.TypeCheckingMode
 import groovy.xml.XmlUtil
@@ -48,7 +47,6 @@ import java.util.zip.ZipInputStream
  * to schedule TeamCity jobs for each individual scenario. This task
  * blocks until all the jobs have finished and aggregates their status.
  */
-@CompileStatic
 class DistributedPerformanceTest extends PerformanceTest {
 
     @Input @Optional
