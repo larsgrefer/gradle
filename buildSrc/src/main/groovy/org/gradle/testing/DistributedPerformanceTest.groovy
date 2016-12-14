@@ -90,8 +90,8 @@ class DistributedPerformanceTest extends PerformanceTest {
 
     private List<TestListener> myTestListeners = []
     private List<TestOutputListener> myTestOutputListeners = []
-    private ListenerBroadcast<TestListener> myTestListenerBroadcaster
-    private ListenerBroadcast<TestOutputListener> myTestOutputListenerBroadcaster
+    ListenerBroadcast<TestListener> myTestListenerBroadcaster
+    ListenerBroadcast<TestOutputListener> myTestOutputListenerBroadcaster
 
     DistributedPerformanceTest() {
         myTestListenerBroadcaster = listenerManager.createAnonymousBroadcaster(TestListener.class)
