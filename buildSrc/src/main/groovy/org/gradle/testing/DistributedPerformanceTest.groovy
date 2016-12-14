@@ -286,10 +286,10 @@ class DistributedPerformanceTest extends PerformanceTest {
         xmlFiles.each {
             def testResult = new XmlSlurper().parse(it)
             int id = 0
-            def testSuiteDescriptor = new DefaultTestClassDescriptor(id++, testResult.@name)
+            def testSuiteDescriptor = new DefaultTestClassDescriptor(id++, testResult.@name.text())
             myTestListenerBroadcaster.getSource().beforeSuite(testSuiteDescriptor)
             testResult.testCase.each { testCase ->
-                def testCaseDescriptor = new DefaultTestMethodDescriptor(id++, testCase.@classname, testCase.@name)
+                def testCaseDescriptor = new DefaultTestMethodDescriptor(id++, testCase.@classname.text(), testCase.@name.text())
                 def source = myTestListenerBroadcaster.getSource()
                 source.beforeTest(testCaseDescriptor)
                 def skipped = testCase.skipped
@@ -301,7 +301,7 @@ class DistributedPerformanceTest extends PerformanceTest {
                     source.afterTest(testCaseDescriptor, new DefaultTestResult(TestResult.ResultType.SUCCESS, 0, 0, 1, 1, 0, []))
                 }
             }
-            myTestListenerBroadcaster.getSource().afterSuite(testSuiteDescriptor, new DefaultTestResult(TestResult.ResultType.SUCCESS, 0, 0, testR))
+            myTestListenerBroadcaster.getSource().afterSuite(testSuiteDescriptor, new DefaultTestResult(TestResult.ResultType.SUCCESS, 0, 0, 0, 0, 0, []))
         }
     }
 
