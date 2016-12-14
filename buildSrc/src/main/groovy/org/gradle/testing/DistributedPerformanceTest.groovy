@@ -101,13 +101,11 @@ class DistributedPerformanceTest extends PerformanceTest {
     @Override
     void addTestListener(TestListener listener) {
         myTestListeners.add(listener)
-        super.addTestListener(listener)
     }
 
     @Override
     void addTestOutputListener(TestOutputListener listener) {
         myTestOutputListeners.add(listener)
-        super.addTestOutputListener(listener)
     }
 
     void setScenarioList(File scenarioList) {
