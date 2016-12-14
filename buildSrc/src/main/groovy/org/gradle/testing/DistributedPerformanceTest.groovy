@@ -18,6 +18,7 @@ package org.gradle.testing
 
 import com.google.common.base.Splitter
 import com.google.common.collect.Lists
+import groovy.transform.CompileStatic
 import groovy.transform.TypeChecked
 import groovy.transform.TypeCheckingMode
 import groovy.xml.XmlUtil
@@ -35,6 +36,7 @@ import org.gradle.api.tasks.testing.TestListener
 import org.gradle.api.tasks.testing.TestOutputListener
 import org.gradle.api.tasks.testing.TestResult
 import org.gradle.internal.IoActions
+import org.gradle.internal.event.ListenerBroadcast
 
 import java.util.concurrent.TimeUnit
 import java.util.zip.ZipInputStream
@@ -47,6 +49,7 @@ import java.util.zip.ZipInputStream
  * to schedule TeamCity jobs for each individual scenario. This task
  * blocks until all the jobs have finished and aggregates their status.
  */
+@CompileStatic
 class DistributedPerformanceTest extends PerformanceTest {
 
     @Input @Optional
@@ -87,6 +90,13 @@ class DistributedPerformanceTest extends PerformanceTest {
 
     private List<TestListener> myTestListeners = []
     private List<TestOutputListener> myTestOutputListeners = []
+    private ListenerBroadcast<TestListener> myTestListenerBroadcaster
+    private ListenerBroadcast<TestOutputListener> myTestOutputListenerBroadcaster
+
+    DistributedPerformanceTest() {
+        myTestListenerBroadcaster = listenerManager.createAnonymousBroadcaster(TestListener.class)
+        myTestOutputListenerBroadcaster = listenerManager.createAnonymousBroadcaster(TestOutputListener.class)
+    }
 
     @Override
     void addTestListener(TestListener listener) {
@@ -120,8 +130,8 @@ class DistributedPerformanceTest extends PerformanceTest {
     private void releaseListeners() {
         myTestOutputListeners.clear()
         myTestListeners.clear()
-        getTestListenerBroadcaster().removeAll()
-        getTestOutputListenerBroadcaster().removeAll()
+        myTestListenerBroadcaster.removeAll()
+        myTestOutputListenerBroadcaster.removeAll()
     }
 
     private void createWorkerTestResultsTempDir() {
@@ -166,8 +176,8 @@ class DistributedPerformanceTest extends PerformanceTest {
 
     @TypeChecked(TypeCheckingMode.SKIP)
     private void reAddListeners() {
-        getTestListenerBroadcaster().addAll(myTestListeners)
-        getTestOutputListenerBroadcaster().addAll(myTestOutputListeners)
+        myTestListenerBroadcaster.addAll(myTestListeners)
+        myTestOutputListenerBroadcaster.addAll(myTestOutputListeners)
     }
 
     private void fillScenarioList() {
@@ -275,12 +285,12 @@ class DistributedPerformanceTest extends PerformanceTest {
         def xmlFiles = results.findAll { it.name.endsWith('.xml') }
         xmlFiles.each {
             def testResult = new XmlSlurper().parse(it)
-            int id = 0;
+            int id = 0
             def testSuiteDescriptor = new DefaultTestClassDescriptor(id++, testResult.@name)
-            getTestListenerBroadcaster().getSource().beforeSuite(testSuiteDescriptor)
+            myTestListenerBroadcaster.getSource().beforeSuite(testSuiteDescriptor)
             testResult.testCase.each { testCase ->
                 def testCaseDescriptor = new DefaultTestMethodDescriptor(id++, testCase.@classname, testCase.@name)
-                def source = getTestListenerBroadcaster().getSource()
+                def source = myTestListenerBroadcaster.getSource()
                 source.beforeTest(testCaseDescriptor)
                 def skipped = testCase.skipped
                 def failure = testCase.failure
@@ -291,7 +301,7 @@ class DistributedPerformanceTest extends PerformanceTest {
                     source.afterTest(testCaseDescriptor, new DefaultTestResult(TestResult.ResultType.SUCCESS, 0, 0, 1, 1, 0, []))
                 }
             }
-            getTestListenerBroadcaster().getSource().afterSuite(testSuiteDescriptor, new DefaultTestResult(TestResult.ResultType.SUCCESS, 0, 0, testR))
+            myTestListenerBroadcaster.getSource().afterSuite(testSuiteDescriptor, new DefaultTestResult(TestResult.ResultType.SUCCESS, 0, 0, testR))
         }
     }
 
