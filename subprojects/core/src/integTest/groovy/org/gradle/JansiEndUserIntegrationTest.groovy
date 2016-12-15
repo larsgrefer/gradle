@@ -166,9 +166,14 @@ class JansiEndUserIntegrationTest extends AbstractIntegrationSpec {
             class MyClass {}
         """
 
+        // Distribution needed to trigger MixInCoreTypesTransformingClassLoader
+        // injecting necessary methods with internal return types, because
+        // Kotlin compiler plugin was compiled against Gradle 3.2
+        executer.requireGradleDistribution()
         succeeds 'compileKotlin'
 
         then:
+        executer.requireGradleDistribution()
         executedAndNotSkipped(':compileKotlin')
 
         when:
@@ -179,6 +184,7 @@ class JansiEndUserIntegrationTest extends AbstractIntegrationSpec {
         def result = fails 'compileKotlin'
 
         then:
+        executer.requireGradleDistribution()
         executedAndNotSkipped(':compileKotlin')
         result.error.contains('> Compilation error. See log for more details')
         result.error.contains('FailingClass.kt: (2, 34): Expecting member declaration')

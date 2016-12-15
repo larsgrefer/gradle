@@ -53,6 +53,10 @@ class CachedKotlinTaskExecutionIntegrationTest extends AbstractIntegrationSpec i
             }
         """
         when:
+        // Distribution needed to trigger MixInCoreTypesTransformingClassLoader
+        // injecting necessary methods with internal return types, because
+        // Kotlin compiler plugin was compiled against Gradle 3.2
+        executer.requireGradleDistribution()
         withBuildCache().succeeds "customTask"
         then:
         skippedTasks.empty
@@ -62,6 +66,7 @@ class CachedKotlinTaskExecutionIntegrationTest extends AbstractIntegrationSpec i
         file("buildSrc/.gradle").deleteDir()
         cleanBuildDir()
 
+        executer.requireGradleDistribution()
         withBuildCache().succeeds "customTask"
         then:
         skippedTasks.contains ":customTask"
@@ -81,6 +86,10 @@ class CachedKotlinTaskExecutionIntegrationTest extends AbstractIntegrationSpec i
             }
         """
         when:
+        // Distribution needed to trigger MixInCoreTypesTransformingClassLoader
+        // injecting necessary methods with internal return types, because
+        // Kotlin compiler plugin was compiled against Gradle 3.2
+        executer.requireGradleDistribution()
         withBuildCache().succeeds "customTask"
         then:
         skippedTasks.empty
@@ -90,6 +99,7 @@ class CachedKotlinTaskExecutionIntegrationTest extends AbstractIntegrationSpec i
         taskSourceFile.text = customKotlinTask(" modified")
 
         cleanBuildDir()
+        executer.requireGradleDistribution()
         withBuildCache().succeeds "customTask"
         then:
         nonSkippedTasks.contains ":customTask"
